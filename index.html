@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700;900&family=Roboto+Mono:wght=500&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -44,9 +44,10 @@
             </div>
             <p class="text-yellow-400 tracking-widest text-xs font-bold mb-2 uppercase">Okinawa Trip 2026</p>
             <h1 class="text-4xl font-black mb-1">沖繩之旅</h1>
+            <!-- 狀態欄已更改為動態顯示 -->
             <div id="auth-status" class="flex items-center gap-2 text-blue-200 text-sm">
-                <i class="ph-bold ph-spinner animate-spin"></i>
-                <span>資料庫連接中...</span>
+                <i class="ph-bold ph-hourglass-simple-half animate-spin"></i>
+                <span>正在連線至資料庫...</span>
             </div>
             
             <!-- 日期切換器 (Tab) -->
@@ -67,7 +68,7 @@
                 <!-- JS 渲染內容 -->
                 <div id="loading-message" class="ml-12 mt-10 text-gray-400 text-center">
                     <i class="ph-bold ph-hourglass-simple-half animate-spin text-3xl mb-2"></i>
-                    <p>正在載入或初始化行程數據...</p>
+                    <p>正在連線或載入行程數據...</p>
                 </div>
             </div>
         </div>
@@ -83,51 +84,54 @@
         <div class="bg-white rounded-xl w-full max-w-sm p-6 shadow-2xl" onclick="event.stopPropagation()">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">新增行程項目</h2>
             <form id="add-item-form" class="space-y-4">
+                
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">中文標題 (必填)</label>
-                    <input type="text" id="modal-title" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <label for="modal-title" class="block text-sm font-medium text-gray-700">標題 (中文)</label>
+                    <input type="text" id="modal-title" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
                 </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">日文名稱 (選填)</label>
-                    <input type="text" id="modal-name_jp" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <label for="modal-name_jp" class="block text-sm font-medium text-gray-700">地點名稱 (日文)</label>
+                    <input type="text" id="modal-name_jp" placeholder="可選填" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">開始時間 (例: 10:00)</label>
-                        <input type="text" id="modal-time" required class="w-full p-2 border border-gray-300 rounded-lg">
+                
+                <div class="flex space-x-4">
+                    <div class="w-1/2">
+                        <label for="modal-time" class="block text-sm font-medium text-gray-700">開始時間</label>
+                        <input type="text" id="modal-time" placeholder="例如: 09:00 或 推薦" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">結束時間 (選填)</label>
-                        <input type="text" id="modal-end" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <div class="w-1/2">
+                        <label for="modal-end" class="block text-sm font-medium text-gray-700">結束時間</label>
+                        <input type="text" id="modal-end" placeholder="可選填, 例如: 11:00" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
                     </div>
                 </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">營業時間 / 備註時間</label>
-                    <input type="text" id="modal-hours" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="例: 11:00 - 22:00">
+                    <label for="modal-location" class="block text-sm font-medium text-gray-700">Google 地圖關鍵字</label>
+                    <input type="text" id="modal-location" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
                 </div>
+                
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Google 地圖關鍵字 (必填)</label>
-                    <input type="text" id="modal-location" required class="w-full p-2 border border-gray-300 rounded-lg" placeholder="用作地圖導航">
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">簡短描述 / 備註</label>
-                    <input type="text" id="modal-desc" class="w-full p-2 border border-gray-300 rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">行程類型</label>
-                    <select id="modal-type" class="w-full p-2 border border-gray-300 rounded-lg">
-                        <option value="sight">景點/打卡</option>
-                        <option value="food">美食/餐飲</option>
-                        <option value="shop">購物/手信</option>
-                        <option value="hotel">住宿</option>
-                        <option value="plane">交通/飛機</option>
-                        <option value="transport">交通/租車</option>
-                        <option value="default">其他</option>
+                    <label for="modal-type" class="block text-sm font-medium text-gray-700">類型</label>
+                    <select id="modal-type" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                        <option value="sight">景點 (Sight)</option>
+                        <option value="food">美食 (Food)</option>
+                        <option value="shop">購物 (Shop)</option>
+                        <option value="plane">飛機 (Plane)</option>
+                        <option value="hotel">酒店 (Hotel)</option>
+                        <option value="transport">交通 (Transport)</option>
+                        <option value="default">其他 (Other)</option>
                     </select>
                 </div>
+
+                <div>
+                    <label for="modal-desc" class="block text-sm font-medium text-gray-700">描述/備註</label>
+                    <textarea id="modal-desc" rows="2" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+
                 <div class="flex justify-end pt-4 space-x-3">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">取消</button>
-                    <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">確認新增</button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-md">新增</button>
                 </div>
             </form>
         </div>
@@ -136,28 +140,46 @@
     <!-- Firebase 腳本 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 設置日誌級別，方便調試
-        setLogLevel('debug');
+        // ====================================================================
+        // 【重要：請在此處填入您的 Firebase 配置】
+        // 如果您在 Canvas 外運行，請將 YOUR_... 替換為您個人 Firebase 專案的配置
+        // 確保您已在專案中啟用 Firestore 和匿名認證 (Anonymous Sign-in)
+        // ====================================================================
+        const customFirebaseConfig = {
+            apiKey: "AIzaSyDVRPIlrxQDjuIoedH77G3q73aE-SBNB1Y",
+            authDomain: "travelrectestttt.firebaseapp.com",
+            projectId: "travelrectestttt",
+            storageBucket: "travelrectestttt.firebasestorage.app",
+            messagingSenderId: "250636703582",
+            appId: "1:250636703582:web:a9673f260cbd0dc52da1cf",
+            measurementId: "G-422YSHW8KG"
+        };
+        // ====================================================================
+
+        // 檢查是否在 Canvas 環境中，如果在，則使用 Canvas 提供的配置，否則使用自定義配置
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && JSON.parse(__firebase_config).projectId)
+            ? JSON.parse(__firebase_config)
+            : customFirebaseConfig;
         
-        // 全局變量
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // Canvas 專用的全域變數 (在 Pages 上會是 undefined)
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
         let db, auth;
         let userId = null;
         let currentDay = '1';
         let itineraryData = {};
-        const TRIP_DOC_ID = 'tripData';
+        const TRIP_DOC_ID = 'okinawa_2026_itinerary'; // 在您個人 DB 中，此文件將位於 /trips/okinawa_2026_itinerary
+
         
         const loadingMessage = document.getElementById('loading-message');
         const authStatusElement = document.getElementById('auth-status');
         const dayTabsElement = document.getElementById('day-tabs');
 
-        // 初始行程數據 (只在資料庫沒有數據時使用)
+        // 初始行程數據 (用於文件初始化時寫入)
         const initialItinerary = {
             1: [
                 { id: crypto.randomUUID(), time: "06:30", end: "07:30", title: "機場 Check in", name_jp: "香港国際空港", hours: "24小時", desc: "UO820 | 預留時間寄艙", location: "香港國際機場", type: "plane" },
@@ -166,7 +188,7 @@
                 { id: crypto.randomUUID(), time: "13:00", end: "14:00", title: "牧志市場飯糰", name_jp: "ポークたまごおにぎり", hours: "07:00 - 19:00", desc: "Potama 飯糰 | 必吃排隊美食", location: "Pork Tamago Onigiri Honten", type: "food" },
                 { id: crypto.randomUUID(), time: "15:00", end: "", title: "Check-in 酒店", name_jp: "アルモントホテル那覇県庁前", hours: "Check-in: 14:00", desc: "縣廳前站步行 3 分鐘", location: "Almont Hotel Naha-Kenchomae", type: "hotel" },
             ],
-            2: [], // <-- 新增 Day 2
+            2: [], 
             3: [
                 { id: crypto.randomUUID(), time: "09:00", end: "11:00", title: "玉泉洞奇景", name_jp: "おきなわワールド", hours: "09:00 - 17:30", desc: "Okinawa World | 鐘乳洞", location: "Okinawa World", type: "sight" },
                 { id: crypto.randomUUID(), time: "11:30", end: "12:30", title: "知念岬公園", name_jp: "知念岬公園", hours: "24小時開放", desc: "絕美海景公園", location: "Cape Chinen Park", type: "sight" },
@@ -185,39 +207,67 @@
         
         // === Firebase 初始化與認證 ===
         async function initializeFirebase() {
+            // 檢查 Firebase config 是否有效 (如果用戶沒有替換金鑰，apiKey 會是 "YOUR_API_KEY")
+            if (firebaseConfig.apiKey === "AIzaSyDVRPIlrxQDjuIoedH77G3q73aE-SBNB1Y" || !firebaseConfig.projectId) {
+                 console.error("Firebase Configuration Missing. Running in static mode.");
+                 authStatusElement.innerHTML = `<i class="ph-bold ph-warning text-yellow-400"></i> <span>請填入您的 Firebase 金鑰！</span>`;
+                 // 在靜態模式下直接渲染預設數據
+                 itineraryData = initialItinerary;
+                 renderAll();
+                 return; 
+            }
+
             try {
+                // 執行 Firebase 初始化
+                setLogLevel('debug'); 
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // 檢查是否在 Canvas 環境中，並使用相應的認證方式
                 if (initialAuthToken) {
+                    // Canvas 認證
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
+                    // GitHub Pages/本地運行，使用匿名認證
                     await signInAnonymously(auth);
                 }
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
-                        authStatusElement.innerHTML = `<i class="ph-bold ph-user-circle"></i> <span>用戶 ID: ${userId.substring(0, 8)}...</span>`;
-                        startListeningToData();
+                        // 根據是否在 Canvas 運行，決定資料庫路徑
+                        const isCanvas = typeof __firebase_config !== 'undefined';
+                        const statusText = isCanvas 
+                            ? `Canvas 用戶 ID: ${userId.substring(0, 8)}...` 
+                            : `匿名用戶 ID: ${userId.substring(0, 8)}...`;
+                            
+                        authStatusElement.innerHTML = `<i class="ph-bold ph-user-circle text-green-400"></i> <span>${statusText}</span>`;
+                        startListeningToData(isCanvas);
                     } else {
                         userId = null;
-                        authStatusElement.innerHTML = `<i class="ph-bold ph-warning"></i> <span>未認證用戶</span>`;
+                        authStatusElement.innerHTML = `<i class="ph-bold ph-x-circle text-red-400"></i> <span>認證失敗，無法編輯</span>`;
                     }
                 });
 
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
-                authStatusElement.innerHTML = `<i class="ph-bold ph-x-circle text-red-400"></i> <span>初始化錯誤</span>`;
+                authStatusElement.innerHTML = `<i class="ph-bold ph-x-circle text-red-400"></i> <span>資料庫連線錯誤</span>`;
+                // 初始化失敗時，改用靜態數據
+                itineraryData = initialItinerary;
+                renderAll();
             }
         }
 
-        // === Firestore 數據監聽與處理 ===
-        function startListeningToData() {
+        // === Firestore 數據監聽與處理 (路徑已調整) ===
+        function startListeningToData(isCanvas) {
             if (!db || !userId) return;
 
-            const docPath = `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}`;
+            // 根據運行環境選擇路徑
+            const docPath = isCanvas
+                ? `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}` // Canvas 環境
+                : `/trips/${TRIP_DOC_ID}`; // GitHub Pages 或本地運行環境
+            
             const tripDocRef = doc(db, docPath);
 
             onSnapshot(tripDocRef, (docSnapshot) => {
@@ -229,6 +279,7 @@
                     // 如果文件不存在，寫入初始數據
                     console.log("No data found. Initializing trip data...");
                     itineraryData = initialItinerary;
+                    // 注意：在 GitHub Pages 上需要設定 Firestore 安全規則允許匿名寫入
                     setDoc(tripDocRef, itineraryData).catch(e => console.error("Error writing initial data:", e));
                 }
                 loadingMessage.classList.add('hidden');
@@ -240,15 +291,28 @@
         
         // === 數據操作函數 ===
         async function updateData() {
-            if (!db || !userId) return;
-            const docPath = `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}`;
+            if (!db || !userId) {
+                console.error('Database connection or user ID missing.');
+                return;
+            }
+            
+            const isCanvas = typeof __firebase_config !== 'undefined';
+            const docPath = isCanvas
+                ? `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}`
+                : `/trips/${TRIP_DOC_ID}`;
+                
             const tripDocRef = doc(db, docPath);
-            // 使用 setTimeout 實現 debounce，避免過度寫入
             await setDoc(tripDocRef, itineraryData);
         }
 
         window.deleteItem = async function(dayKey, itemId) {
-            if (!confirm('確認刪除此行程項目嗎？')) return;
+            if (!db || !userId) {
+                alert('無法刪除：資料庫未連線或用戶未認證。');
+                return;
+            }
+            // 使用自定義 modal 替代 confirm()
+            const shouldDelete = window.prompt("請輸入 'DELETE' 確認刪除此行程項目:");
+            if (shouldDelete !== 'DELETE') return;
 
             const dayItems = itineraryData[dayKey];
             if (!dayItems) return;
@@ -258,20 +322,17 @@
         }
         
         window.addNewDay = async function() {
-            const dayKeys = Object.keys(itineraryData).filter(k => k !== 'food').map(k => parseInt(k)).filter(k => !isNaN(k));
-            const newDayNumber = dayKeys.length > 0 ? Math.max(...dayKeys) + 1 : 1;
-            const newDayKey = newDayNumber.toString();
-            
-            if (itineraryData[newDayKey]) {
-                 // 避免覆蓋
-                 alert(`日子 ${newDayKey} 已存在!`);
-                 return;
+            if (!db || !userId) {
+                alert('無法新增：資料庫未連線或用戶未認證。');
+                return;
             }
 
-            itineraryData[newDayKey] = [];
-            currentDay = newDayKey;
+            const currentKeys = Object.keys(itineraryData).filter(k => k !== 'food').map(Number);
+            const nextDay = (currentKeys.length > 0 ? Math.max(...currentKeys) : 0) + 1;
+            
+            itineraryData[nextDay] = [];
+            currentDay = String(nextDay);
             await updateData();
-            // renderAll() 會在數據更新後自動觸發
         }
 
         // === Modal 處理 ===
@@ -279,7 +340,11 @@
         const form = document.getElementById('add-item-form');
         
         window.openModal = function() {
-            form.reset(); // 清空表單
+            if (!db || !userId) {
+                alert('請先確保 Firebase 連線成功！');
+                return;
+            }
+            form.reset(); 
             modal.classList.remove('hidden');
         }
 
@@ -292,19 +357,23 @@
         form.onsubmit = async function(e) {
             e.preventDefault();
             
+            if (!db || !userId) {
+                 alert('資料庫未連線或用戶未認證，無法新增項目。');
+                 return;
+            }
+
             const newItem = {
-                id: crypto.randomUUID(), // 為新項目生成唯一 ID
+                id: crypto.randomUUID(),
                 title: document.getElementById('modal-title').value.trim(),
-                name_jp: document.getElementById('modal-name_jp').value.trim() || '無日文名',
+                name_jp: document.getElementById('modal-name_jp').value.trim() || '',
                 time: document.getElementById('modal-time').value.trim(),
                 end: document.getElementById('modal-end').value.trim(),
-                hours: document.getElementById('modal-hours').value.trim(),
+                hours: document.getElementById('modal-hours').value.trim() || '',
                 location: document.getElementById('modal-location').value.trim(),
-                desc: document.getElementById('modal-desc').value.trim(),
+                desc: document.getElementById('modal-desc').value.trim() || '',
                 type: document.getElementById('modal-type').value,
             };
 
-            // 確保目標日子的陣列存在
             if (!itineraryData[currentDay]) {
                 itineraryData[currentDay] = [];
             }
@@ -327,11 +396,10 @@
         }
 
         function renderTabs() {
-            const dayKeys = Object.keys(itineraryData).sort((a, b) => {
-                if (a === 'food') return 1;
-                if (b === 'food') return -1;
-                return parseInt(a) - parseInt(b);
-            });
+            const keys = Object.keys(itineraryData).filter(k => k !== 'food');
+            const sortedKeys = keys.length === 0 ? ['1'] : keys.sort((a, b) => parseInt(a) - parseInt(b));
+            
+            const dayKeys = sortedKeys.concat(itineraryData['food'] ? ['food'] : []);
             
             dayTabsElement.innerHTML = '';
             
@@ -354,12 +422,10 @@
                 dayTabsElement.insertAdjacentHTML('beforeend', buttonHtml);
             });
             
-            // 確保當前選擇的 dayKey 在資料中存在，如果不存在則切換到 Day 1
             if (!dayKeys.includes(currentDay)) {
-                 currentDay = dayKeys[0] || '1'; // 如果沒有任何資料，則設置為 '1'
+                 currentDay = dayKeys[0] || '1'; 
             }
 
-            // 重新應用當前活動樣式
             document.querySelectorAll('.day-tab').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-blue-900', 'scale-110', 'border-transparent', 'shadow-lg');
                 btn.classList.add('bg-blue-800', 'text-blue-200', 'border-blue-700/50', 'shadow-inner');
@@ -384,7 +450,7 @@
                 container.innerHTML += `
                     <div class="ml-12 mt-10 text-gray-400 text-center">
                         <i class="ph-bold ph-list-plus text-3xl mb-2"></i>
-                        <p>${currentDay === 'food' ? '「美食清單」' : `「Day ${currentDay}」`} 暫時沒有行程。<br>點擊右下角紅色 <i class="ph-bold ph-plus inline-block"></i> 按鈕新增！</p>
+                        <p>${currentDay === 'food' ? '「美食清單」' : `「Day ${currentDay}」`} 暫時沒有行程。<br>請點擊右下角「+」新增。</p>
                     </div>
                 `;
                 return;
@@ -392,7 +458,6 @@
 
             // 排序：按時間排序
             items.sort((a, b) => {
-                // 處理 '推薦' 和空時間
                 if (a.time === '推薦' || a.time === '') return 1;
                 if (b.time === '推薦' || b.time === '') return -1;
                 return a.time.localeCompare(b.time);
@@ -411,9 +476,8 @@
 
                     <div class="bg-white rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.05)] border border-white p-5 relative card-accent hover:shadow-lg transition-shadow">
                         
-                        <!-- 刪除按鈕 -->
                         <button onclick="deleteItem('${currentDay}', '${item.id}')" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors z-20">
-                             <i class="ph-bold ph-trash text-lg"></i>
+                           <i class="ph-bold ph-trash text-lg"></i>
                         </button>
 
                         <div class="flex items-center gap-2 mb-2">
@@ -424,7 +488,7 @@
 
                         <h3 class="text-xl font-bold text-gray-800 leading-tight pr-8">
                             ${item.title}
-                            <span class="block text-sm font-medium text-blue-600/80 mt-1">${item.name_jp}</span>
+                            ${item.name_jp ? `<span class="block text-sm font-medium text-blue-600/80 mt-1">${item.name_jp}</span>` : ''}
                         </h3>
                         
                         ${item.hours ? `
