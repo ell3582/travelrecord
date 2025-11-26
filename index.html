@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沖繩之旅 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: #FFF5F5;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-mono { font-family: 'Roboto Mono', monospace; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .card-accent::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 24px 24px 0;
+            border-color: transparent #EF4444 transparent transparent;
+        }
+    </style>
+</head>
+<body class="flex justify-center min-h-screen bg-[#FDF2F2]">
+
+    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col">
+        
+        <!-- 頂部封面 -->
+        <div class="bg-[#1e3a8a] text-white p-8 pt-12 rounded-b-[2rem] shadow-lg shrink-0 z-10 relative overflow-hidden">
+            <div class="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
+                <i class="ph-fill ph-airplane-tilt text-9xl"></i>
+            </div>
+            <p class="text-yellow-400 tracking-widest text-xs font-bold mb-2 uppercase">Okinawa Trip 2026</p>
+            <h1 class="text-4xl font-black mb-1">沖繩之旅</h1>
+            <div id="auth-status" class="flex items-center gap-2 text-blue-200 text-sm">
+                <i class="ph-bold ph-spinner animate-spin"></i>
+                <span>資料庫連接中...</span>
+            </div>
+            
+            <!-- 日期切換器 (Tab) -->
+            <div id="day-tabs" class="flex mt-8 gap-2 overflow-x-auto no-scrollbar pb-2">
+                <!-- Tabs will be rendered here -->
+            </div>
+            
+            <!-- 新增日子按鈕 -->
+            <button onclick="addNewDay()" class="mt-4 px-3 py-1 bg-blue-700/50 text-blue-200 rounded-full text-xs font-bold hover:bg-blue-700 transition-colors">
+                <i class="ph-bold ph-calendar-plus mr-1"></i> 新增日子
+            </button>
+        </div>
+
+        <!-- 行程內容區 -->
+        <div class="flex-1 bg-[#FDF2F2] p-6 pb-24 overflow-y-auto">
+            <div id="timeline-container" class="relative pl-4">
+                <div class="absolute left-[29px] top-4 bottom-0 w-[2px] border-l-2 border-dashed border-red-300"></div>
+                <!-- JS 渲染內容 -->
+                <div id="loading-message" class="ml-12 mt-10 text-gray-400 text-center">
+                    <i class="ph-bold ph-hourglass-simple-half animate-spin text-3xl mb-2"></i>
+                    <p>正在載入或初始化行程數據...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增行程按鈕 (浮動) -->
+        <button onclick="openModal()" id="add-item-btn" class="fixed bottom-6 right-6 w-14 h-14 bg-red-500 text-white rounded-full shadow-xl shadow-red-900/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-50">
+            <i class="ph-bold ph-plus text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- 新增行程 Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 shadow-2xl" onclick="event.stopPropagation()">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">新增行程項目</h2>
+            <form id="add-item-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">中文標題 (必填)</label>
+                    <input type="text" id="modal-title" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">日文名稱 (選填)</label>
+                    <input type="text" id="modal-name_jp" class="w-full p-2 border border-gray-300 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">開始時間 (例: 10:00)</label>
+                        <input type="text" id="modal-time" required class="w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">結束時間 (選填)</label>
+                        <input type="text" id="modal-end" class="w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">營業時間 / 備註時間</label>
+                    <input type="text" id="modal-hours" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="例: 11:00 - 22:00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Google 地圖關鍵字 (必填)</label>
+                    <input type="text" id="modal-location" required class="w-full p-2 border border-gray-300 rounded-lg" placeholder="用作地圖導航">
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">簡短描述 / 備註</label>
+                    <input type="text" id="modal-desc" class="w-full p-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">行程類型</label>
+                    <select id="modal-type" class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option value="sight">景點/打卡</option>
+                        <option value="food">美食/餐飲</option>
+                        <option value="shop">購物/手信</option>
+                        <option value="hotel">住宿</option>
+                        <option value="plane">交通/飛機</option>
+                        <option value="transport">交通/租車</option>
+                        <option value="default">其他</option>
+                    </select>
+                </div>
+                <div class="flex justify-end pt-4 space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">取消</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">確認新增</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase 腳本 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 設置日誌級別，方便調試
+        setLogLevel('debug');
+        
+        // 全局變量
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth;
+        let userId = null;
+        let currentDay = '1';
+        let itineraryData = {};
+        const TRIP_DOC_ID = 'tripData';
+        
+        const loadingMessage = document.getElementById('loading-message');
+        const authStatusElement = document.getElementById('auth-status');
+        const dayTabsElement = document.getElementById('day-tabs');
+
+        // 初始行程數據 (只在資料庫沒有數據時使用)
+        const initialItinerary = {
+            1: [
+                { id: crypto.randomUUID(), time: "06:30", end: "07:30", title: "機場 Check in", name_jp: "香港国際空港", hours: "24小時", desc: "UO820 | 預留時間寄艙", location: "香港國際機場", type: "plane" },
+                { id: crypto.randomUUID(), time: "07:30", end: "10:55", title: "飛往沖繩", name_jp: "那覇空港", hours: "", desc: "UO820 | 抵達那霸機場", location: "那霸機場", type: "plane" },
+                { id: crypto.randomUUID(), time: "12:00", end: "13:00", title: "國際通逛街", name_jp: "国際通り", hours: "10:00 - 22:00", desc: "最熱鬧的大街", location: "國際通", type: "shop" },
+                { id: crypto.randomUUID(), time: "13:00", end: "14:00", title: "牧志市場飯糰", name_jp: "ポークたまごおにぎり", hours: "07:00 - 19:00", desc: "Potama 飯糰 | 必吃排隊美食", location: "Pork Tamago Onigiri Honten", type: "food" },
+                { id: crypto.randomUUID(), time: "15:00", end: "", title: "Check-in 酒店", name_jp: "アルモントホテル那覇県庁前", hours: "Check-in: 14:00", desc: "縣廳前站步行 3 分鐘", location: "Almont Hotel Naha-Kenchomae", type: "hotel" },
+            ],
+            2: [], // <-- 新增 Day 2
+            3: [
+                { id: crypto.randomUUID(), time: "09:00", end: "11:00", title: "玉泉洞奇景", name_jp: "おきなわワールド", hours: "09:00 - 17:30", desc: "Okinawa World | 鐘乳洞", location: "Okinawa World", type: "sight" },
+                { id: crypto.randomUUID(), time: "11:30", end: "12:30", title: "知念岬公園", name_jp: "知念岬公園", hours: "24小時開放", desc: "絕美海景公園", location: "Cape Chinen Park", type: "sight" },
+            ],
+            'food': [
+                { id: crypto.randomUUID(), time: "推薦", end: "", title: "燒肉本部牧場", name_jp: "焼肉もとぶ牧場", hours: "11:30 - 15:00 / 17:00 - 22:00", desc: "高級燒肉 / 和牛", location: "Motobu Bokujo Naha", type: "food" },
+                { id: crypto.randomUUID(), time: "推薦", end: "", title: "Blue Seal", name_jp: "ブルーシール", hours: "10:00 - 22:00", desc: "沖繩必吃雪糕", location: "Blue Seal Ice Cream", type: "food" },
+            ]
+        };
+
+        // 圖示對照表
+        const icons = {
+            plane: "ph-airplane-tilt", food: "ph-fork-knife", shop: "ph-bag", sight: "ph-camera", 
+            hotel: "ph-bed", transport: "ph-car", default: "ph-map-pin"
+        };
+        
+        // === Firebase 初始化與認證 ===
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        authStatusElement.innerHTML = `<i class="ph-bold ph-user-circle"></i> <span>用戶 ID: ${userId.substring(0, 8)}...</span>`;
+                        startListeningToData();
+                    } else {
+                        userId = null;
+                        authStatusElement.innerHTML = `<i class="ph-bold ph-warning"></i> <span>未認證用戶</span>`;
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                authStatusElement.innerHTML = `<i class="ph-bold ph-x-circle text-red-400"></i> <span>初始化錯誤</span>`;
+            }
+        }
+
+        // === Firestore 數據監聽與處理 ===
+        function startListeningToData() {
+            if (!db || !userId) return;
+
+            const docPath = `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}`;
+            const tripDocRef = doc(db, docPath);
+
+            onSnapshot(tripDocRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    itineraryData = docSnapshot.data();
+                    console.log("Data loaded from Firestore:", itineraryData);
+                    renderAll();
+                } else {
+                    // 如果文件不存在，寫入初始數據
+                    console.log("No data found. Initializing trip data...");
+                    itineraryData = initialItinerary;
+                    setDoc(tripDocRef, itineraryData).catch(e => console.error("Error writing initial data:", e));
+                }
+                loadingMessage.classList.add('hidden');
+            }, (error) => {
+                console.error("Firestore Snapshot Error:", error);
+                loadingMessage.innerHTML = `<p class="text-red-500">資料載入失敗: ${error.message}</p>`;
+            });
+        }
+        
+        // === 數據操作函數 ===
+        async function updateData() {
+            if (!db || !userId) return;
+            const docPath = `/artifacts/${appId}/users/${userId}/itinerary/${TRIP_DOC_ID}`;
+            const tripDocRef = doc(db, docPath);
+            // 使用 setTimeout 實現 debounce，避免過度寫入
+            await setDoc(tripDocRef, itineraryData);
+        }
+
+        window.deleteItem = async function(dayKey, itemId) {
+            if (!confirm('確認刪除此行程項目嗎？')) return;
+
+            const dayItems = itineraryData[dayKey];
+            if (!dayItems) return;
+
+            itineraryData[dayKey] = dayItems.filter(item => item.id !== itemId);
+            await updateData();
+        }
+        
+        window.addNewDay = async function() {
+            const dayKeys = Object.keys(itineraryData).filter(k => k !== 'food').map(k => parseInt(k)).filter(k => !isNaN(k));
+            const newDayNumber = dayKeys.length > 0 ? Math.max(...dayKeys) + 1 : 1;
+            const newDayKey = newDayNumber.toString();
+            
+            if (itineraryData[newDayKey]) {
+                 // 避免覆蓋
+                 alert(`日子 ${newDayKey} 已存在!`);
+                 return;
+            }
+
+            itineraryData[newDayKey] = [];
+            currentDay = newDayKey;
+            await updateData();
+            // renderAll() 會在數據更新後自動觸發
+        }
+
+        // === Modal 處理 ===
+        const modal = document.getElementById('add-modal');
+        const form = document.getElementById('add-item-form');
+        
+        window.openModal = function() {
+            form.reset(); // 清空表單
+            modal.classList.remove('hidden');
+        }
+
+        window.closeModal = function(event) {
+            if (!event || event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const newItem = {
+                id: crypto.randomUUID(), // 為新項目生成唯一 ID
+                title: document.getElementById('modal-title').value.trim(),
+                name_jp: document.getElementById('modal-name_jp').value.trim() || '無日文名',
+                time: document.getElementById('modal-time').value.trim(),
+                end: document.getElementById('modal-end').value.trim(),
+                hours: document.getElementById('modal-hours').value.trim(),
+                location: document.getElementById('modal-location').value.trim(),
+                desc: document.getElementById('modal-desc').value.trim(),
+                type: document.getElementById('modal-type').value,
+            };
+
+            // 確保目標日子的陣列存在
+            if (!itineraryData[currentDay]) {
+                itineraryData[currentDay] = [];
+            }
+            
+            itineraryData[currentDay].push(newItem);
+            
+            closeModal();
+            await updateData();
+        }
+
+        // === 渲染函數 ===
+        window.switchDay = function(day) {
+            currentDay = day;
+            renderAll();
+        }
+        
+        function renderAll() {
+            renderTabs();
+            renderTimeline();
+        }
+
+        function renderTabs() {
+            const dayKeys = Object.keys(itineraryData).sort((a, b) => {
+                if (a === 'food') return 1;
+                if (b === 'food') return -1;
+                return parseInt(a) - parseInt(b);
+            });
+            
+            dayTabsElement.innerHTML = '';
+            
+            dayKeys.forEach(dayKey => {
+                const isFood = dayKey === 'food';
+                const dayDisplay = isFood ? 'List' : `Day ${dayKey}`;
+                const iconHtml = isFood ? '<i class="ph-bold ph-fork-knife text-lg"></i>' : `<span class="text-xl font-bold font-mono">${dayKey}</span>`;
+                
+                const isActive = currentDay === dayKey;
+                const activeClass = isActive 
+                    ? 'bg-white text-blue-900 scale-110 border-transparent shadow-lg' 
+                    : 'bg-blue-800 text-blue-200 border-blue-700/50 shadow-inner';
+
+                const buttonHtml = `
+                    <button onclick="switchDay('${dayKey}')" id="tab-${dayKey}" class="day-tab flex-1 min-w-[3.5rem] py-3 rounded-xl hover:bg-blue-700 transition-all flex flex-col items-center justify-center border ${activeClass}">
+                        <span class="text-[10px] uppercase font-bold">${dayDisplay.split(' ')[0]}</span>
+                        ${iconHtml}
+                    </button>
+                `;
+                dayTabsElement.insertAdjacentHTML('beforeend', buttonHtml);
+            });
+            
+            // 確保當前選擇的 dayKey 在資料中存在，如果不存在則切換到 Day 1
+            if (!dayKeys.includes(currentDay)) {
+                 currentDay = dayKeys[0] || '1'; // 如果沒有任何資料，則設置為 '1'
+            }
+
+            // 重新應用當前活動樣式
+            document.querySelectorAll('.day-tab').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-900', 'scale-110', 'border-transparent', 'shadow-lg');
+                btn.classList.add('bg-blue-800', 'text-blue-200', 'border-blue-700/50', 'shadow-inner');
+            });
+            const activeTab = document.getElementById(`tab-${currentDay}`);
+            if(activeTab) {
+                activeTab.classList.remove('bg-blue-800', 'text-blue-200', 'border-blue-700/50', 'shadow-inner');
+                activeTab.classList.add('bg-white', 'text-blue-900', 'scale-110', 'border-transparent', 'shadow-lg');
+            }
+        }
+
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            const line = container.firstElementChild;
+            container.innerHTML = '';
+            container.appendChild(line);
+
+            const items = itineraryData[currentDay] || [];
+
+            if (items.length === 0) {
+                container.innerHTML += `
+                    <div class="ml-12 mt-10 text-gray-400 text-center">
+                        <i class="ph-bold ph-list-plus text-3xl mb-2"></i>
+                        <p>${currentDay === 'food' ? '「美食清單」' : `「Day ${currentDay}」`} 暫時沒有行程。<br>點擊右下角紅色 <i class="ph-bold ph-plus inline-block"></i> 按鈕新增！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 排序：按時間排序
+            items.sort((a, b) => {
+                // 處理 '推薦' 和空時間
+                if (a.time === '推薦' || a.time === '') return 1;
+                if (b.time === '推薦' || b.time === '') return -1;
+                return a.time.localeCompare(b.time);
+            });
+
+
+            items.forEach((item, index) => {
+                const iconClass = icons[item.type] || icons.default;
+                const locationKey = item.name_jp || item.location;
+                
+                const html = `
+                <div class="relative pl-12 mb-8 group animate-fade-in" style="animation-delay: ${index * 50}ms">
+                    <div class="absolute left-[15px] top-6 w-8 h-8 rounded-full border-2 border-red-400 bg-white z-10 flex items-center justify-center shadow-sm">
+                        <i class="ph-bold ${iconClass} text-red-500 text-base"></i>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.05)] border border-white p-5 relative card-accent hover:shadow-lg transition-shadow">
+                        
+                        <!-- 刪除按鈕 -->
+                        <button onclick="deleteItem('${currentDay}', '${item.id}')" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors z-20">
+                             <i class="ph-bold ph-trash text-lg"></i>
+                        </button>
+
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-mono font-bold text-blue-900 text-lg tracking-tight">
+                                ${item.time} ${item.end ? `<span class="text-gray-400 text-sm font-normal">- ${item.end}</span>` : ''}
+                            </span>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-800 leading-tight pr-8">
+                            ${item.title}
+                            <span class="block text-sm font-medium text-blue-600/80 mt-1">${item.name_jp}</span>
+                        </h3>
+                        
+                        ${item.hours ? `
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 mt-2 bg-yellow-50 text-yellow-700 rounded-md text-xs font-bold border border-yellow-100">
+                            <i class="ph-bold ph-clock"></i>
+                            ${item.hours}
+                        </div>
+                        ` : ''}
+
+                        <p class="text-gray-500 text-sm mt-2 mb-4 leading-relaxed border-l-2 border-gray-100 pl-2">
+                            ${item.desc}
+                        </p>
+
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationKey)}" 
+                           target="_blank"
+                           class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors active:scale-95 duration-200 shadow-sm border border-blue-100">
+                            <i class="ph-fill ph-map-pin text-blue-500"></i>
+                            ${item.location.split(' ')[0]}
+                        </a>
+                    </div>
+                </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        
+        // 初始化
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
